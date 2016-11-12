@@ -49,22 +49,7 @@ public class TreasureClass<I> {
 		}
 	}
 
-	public String generateBaseStats(I item) throws FileNotFoundException {
-		
-		Integer baseStat = 0;
-		Scanner sc = new Scanner(new File("armor.txt"));
-		while (sc.hasNextLine()) {
-			String[] split =  sc.nextLine().split("\t");
-			if (split[0].equals((String) item))  {
-				Random rand = new Random();
-				baseStat = rand.nextInt(Integer.parseInt(split[2]) - Integer.parseInt(split[1]))
-						+ Integer.parseInt(split[1]);
-			}
-		}
-		sc.close();
-		return "Defense: " + baseStat;
-	}
-
+	
 //	public String generateAffix(I baseItem) {
 //		Random rand = new Random();
 //		if (rand.nextInt(2) == 1) {

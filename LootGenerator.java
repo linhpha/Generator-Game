@@ -111,9 +111,7 @@ public class LootGenerator {
 	}
 
 	public static Armor splitArmorLine(String line) throws FileNotFoundException {
-		Scanner sc = new Scanner(new File("armor.txt"));
-		String[] split =  sc.nextLine().split("\t");
-		sc.close();
+		String[] split = line.split("\t");
 		return new Armor( split[0], Integer.parseInt(split[1]), Integer.parseInt(split[2]));
 	}
 
@@ -124,10 +122,11 @@ public class LootGenerator {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public String generateBaseStats(String item) throws FileNotFoundException {
+	public static String generateBaseStats(String item) throws FileNotFoundException {
 		Scanner sc = new Scanner(new File("armor.txt"));	
 		List<Armor> armorList = new ArrayList<Armor>();
 		while (sc.hasNextLine()) {
+	
 			armorList.add(splitArmorLine(sc.nextLine()));
 		}
 		sc.close();
@@ -135,11 +134,13 @@ public class LootGenerator {
 		Integer baseStat = 0;
 		for (int i = 0; i < armorList.size(); i++) {
 			if (armorList.get(i).name.equals(item)) {
-				baseStat = rand.nextInt(armorList.get(i).maxAc - armorList.get(i).minAc 
-						+ armorList.get(i).minAc);
+				baseStat = rand.nextInt(armorList.get(i).maxAc - armorList.get(i).minAc) 
+						+ armorList.get(i).minAc;
+
+				return "Defense: " + baseStat;
 			}
 		}
-		return "Defense: " + baseStat;
+		return "";
 	}
 
 
@@ -150,9 +151,10 @@ public class LootGenerator {
 	}
 
 
-	public static String generatePrefix (String baseItem) throws FileNotFoundException {
+	public static String[] generatePrefix (String baseItem) throws FileNotFoundException {
 		Random rand = new Random();
 		Integer prefixStat = 0;
+		String[] prefixArray = {"", ""};
 		Scanner sc = new Scanner(new File("MagicPrefix.txt"));	
 		List<MagicPrefix> prefixList = new ArrayList<MagicPrefix>();
 		while (sc.hasNextLine()) {
@@ -163,16 +165,16 @@ public class LootGenerator {
 
 		if (rand.nextInt(2) == 1) {
 			MagicPrefix mP = prefixList.get(randNum);
+			prefixArray[0] = mP.name + " ";
 			if (mP.mod1Min == mP.mod1Max) {
 				prefixStat = mP.mod1Min;
 			} else {
 				prefixStat = rand.nextInt(mP.mod1Max - mP.mod1Min) + mP.mod1Min;
 
 			}
-			return prefixStat.toString();
-		} else {
-			return "";
-		}
+			prefixArray[1] = mP.mod1Code + ": " + prefixStat.toString();
+		} 
+		return prefixArray;
 
 	}
 
@@ -182,9 +184,10 @@ public class LootGenerator {
 	}
 
 
-	public static String generateSuffix (String baseItem) throws FileNotFoundException {
+	public static String[] generateSuffix (String baseItem) throws FileNotFoundException {
 		Random rand = new Random();
 		Integer suffixStat = 0;
+		String[] suffixArray = {"", ""};
 		Scanner sc = new Scanner(new File("MagicSuffix.txt"));	
 		List<MagicSuffix> suffixList = new ArrayList<MagicSuffix>();
 		while (sc.hasNextLine()) {
@@ -195,50 +198,57 @@ public class LootGenerator {
 
 		if (rand.nextInt(2) == 1) {
 			MagicSuffix mP = suffixList.get(randNum);
+			suffixArray[0] = " " + mP.name;
 			if (mP.mod1Min == mP.mod1Max) {
 				suffixStat = mP.mod1Min;
 			} else {
 				suffixStat = rand.nextInt(mP.mod1Max - mP.mod1Min) + mP.mod1Min;
 			}
-			return suffixStat.toString();
-		} else {
-			return "";
+			suffixArray[1] = mP.mod1Code + ": " + suffixStat.toString();
+		} 
+		return suffixArray;
+	}
+
+
+
+
+	public static void playRound() throws FileNotFoundException {
+		Monster myMonster = pickMonster();
+		System.out.println("Fighting " + myMonster.getMonsterName());
+		System.out.println("You have slain " + myMonster.getMonsterName() + "!");
+		System.out.println(myMonster.getMonsterName() + " dropped: ");
+		System.out.println("");
+		
+		String myTreasure = fetchTreasureClass(myMonster);
+		String myBaseItem = generateBaseItem(myTreasure);
+		String[] myPrefixArray = generatePrefix(myBaseItem);
+		String[] mySuffixArray = generateSuffix(myBaseItem);
+		String myStats = generateBaseStats(myBaseItem);
+		
+		System.out.printf("%s%s%s\n", myPrefixArray[0], myBaseItem, mySuffixArray[0]);
+		System.out.println(myStats);
+		if (!myPrefixArray[1].equals("")) { 
+			System.out.println(myPrefixArray[1]);
+		}
+		if (!mySuffixArray[1].equals("")) { 
+			System.out.println(mySuffixArray[1]);
 		}
 	}
 
-
-
-
-
-
-
-
-
+	
 	public static void main (String[] args) throws FileNotFoundException {
-		Monster newMonster = pickMonster();
-		String treasure = fetchTreasureClass(newMonster);
-		//		System.out.println(newMonster.getMonsterName());
-		//		System.out.println(treasure);
-		//System.out.println("1 " + generateBaseItem("Act 1 Cast B"));
-		//System.out.println("1 " + generateBaseItem("Act 1 Cast B"));
-		System.out.println("Prefix " + generatePrefix(generateBaseItem("Act 1 Cast B")));
-		System.out.println("Suffix " + generateSuffix(generateBaseItem("Act 1 Cast B")));
-
-
-
+		
+		Scanner sc = new Scanner(System.in);
+		String userInput = "Y";
+		while (userInput.equals("Y")) {
+			playRound();
+			System.out.print("\nFight again? [y/n] ");
+			userInput = sc.next().toUpperCase();
+		}
+		sc.close();
 	}
 }
 
-
-
-
-//	@SuppressWarnings("unchecked")
-//	public TreasureClass splitLine (String line) {
-//		String[] split = line.split("\t");	
-//		String[] itemArray = {split[1], split[2], split[3]};
-//		return new TreasureClass (split[0], itemArray);
-//	}
-//	
 
 
 

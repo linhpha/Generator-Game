@@ -1,1 +1,3 @@
-# csc207-homework-7
+
+
+This program implements the generating algorithms found in Diablo III.
